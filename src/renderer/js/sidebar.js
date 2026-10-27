@@ -49,7 +49,7 @@ function render() {
   const kids = h('div.tree-children.root-children', {});
   renderNodes(state.playlists, kids, 1);
   if (!state.playlists.length) {
-    kids.append(h('div.tree-hint', { html: `Create playlists &amp; folders with ${icon('playlistPlus', 13)} ${icon('folderPlus', 13)} — nest them as deep as you like. Each one shuffles on its own.` }));
+    kids.append(h('div.tree-hint', { text: 'No playlists yet' }));
   }
   treeEl.append(kids);
 
@@ -57,8 +57,7 @@ function render() {
 
   const total = [...state.tracks.values()].reduce((s, t) => s + (t.duration || 0), 0);
   const footer = h('div.sb-footer', {},
-    h('div.sb-stats', { text: `${plural(state.tracks.size, 'song')} · ${plural(state.artists.size, 'artist')} · ${fmtLong(total)}` }),
-    h('button.btn.sm.ghost', { html: `${icon('plus', 15)}<span>Add music</span>`, onClick: (e) => {
+    h('button.btn.sm.ghost', { title: `${plural(state.tracks.size, 'song')} · ${plural(state.artists.size, 'artist')} · ${fmtLong(total)}`, html: `${icon('plus', 15)}<span>Add music</span>`, onClick: (e) => {
       const r = e.currentTarget.getBoundingClientRect();
       showMenu(r.left, r.top - 150, [
         { label: 'Add folder…', icon: 'folderPlus', action: addFolders },

@@ -18,6 +18,11 @@ async function boot() {
   state.platform = init.platform;
   state.omarchy = init.omarchy;
   state.settings = { ...DEFAULT_SETTINGS, ...(init.settings || {}) };
+  // Older versions saved fixed panel sizes; switch them to the new auto-scaling layout once.
+  if (init.settings?.themeId && init.settings.layoutVersion !== DEFAULT_SETTINGS.layoutVersion) {
+    for (const k of ['sidebarWidth', 'artistsWidth', 'nowPlayingWidth', 'vizHeight']) state.settings[k] = null;
+    setSetting('layoutVersion', DEFAULT_SETTINGS.layoutVersion);
+  }
   state.playlists = init.playlists || [];
   for (const t of init.tracks) state.tracks.set(t.id, t);
   rebuildIndexes();
@@ -124,12 +129,14 @@ function buildTitlebar() {
 /* ---------- panel resizing ---------- */
 function initResizers() {
   for (const r of document.querySelectorAll('.resizer')) {
+    r.title = 'Drag to resize · double-click to reset';
     r.addEventListener('mousedown', (e) => {
       e.preventDefault();
       const key = r.dataset.for;
       const setting = { sidebar: 'sidebarWidth', artists: 'artistsWidth', nowplaying: 'nowPlayingWidth' }[key];
       const limits = { sidebar: [190, 420], artists: [170, 400], nowplaying: [260, 560] }[key];
-      const startX = e.clientX, start = state.settings[setting];
+      const panel = document.getElementById(key);
+      const startX = e.clientX, start = panel.offsetWidth;
       const dir = key === 'nowplaying' ? -1 : 1;
       document.body.classList.add('resizing');
       const move = (ev) => {
@@ -143,6 +150,12 @@ function initResizers() {
         setSetting(setting, state.settings[setting]);
       };
       addEventListener('mousemove', move); addEventListener('mouseup', up);
+    });
+    // Double-click a divider to go back to automatic sizing.
+    r.addEventListener('dblclick', () => {
+      const setting = { sidebar: 'sidebarWidth', artists: 'artistsWidth', nowplaying: 'nowPlayingWidth' }[r.dataset.for];
+      setSetting(setting, null);
+      applyLook();
     });
   }
 }

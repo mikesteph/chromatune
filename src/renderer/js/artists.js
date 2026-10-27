@@ -1,9 +1,9 @@
 // Artists panel: every artist in the library, searchable and sortable; click to open, double-click to play.
 import { state, bus, setView, setSetting } from './store.js';
 import { queue } from './player.js';
-import { playView, shuffleLibrary } from './actions.js';
+import { playView } from './actions.js';
 import { VirtualList } from './virtuallist.js';
-import { h, $, esc, plural, coverUrl, collator } from './util.js';
+import { h, $, esc, plural, collator } from './util.js';
 import { icon } from './icons.js';
 import { showMenu, dragBadge } from './ui.js';
 
@@ -29,11 +29,10 @@ export function initArtists() {
     sortBtn);
   listEl = h('div.artist-list');
   root.append(head, h('div.panel-search-wrap', { html: icon('search', 14) }, input), listEl);
-  vlist = new VirtualList(listEl, { rowHeight: 52, render: renderRow });
+  vlist = new VirtualList(listEl, { rowHeight: 32, render: renderRow });
   listEl.addEventListener('click', (e) => {
     const row = e.target.closest('.vrow');
     if (!row) return;
-    if (e.target.closest('.ar-play')) { const a = artists[+row.dataset.index]; return a ? playView({ type: 'artist', id: a.name }, { shuffle: true }) : shuffleLibrary(); }
     const a = artists[+row.dataset.index];
     setView(a ? { type: 'artist', id: a.name } : { type: 'all' });
   });
@@ -82,22 +81,13 @@ function refresh() {
   vlist.setCount(artists.length);
 }
 
-const initials = (n) => n.replace(/^the\s+/i, '').split(/\s+/).slice(0, 2).map((w) => w[0] || '').join('').toUpperCase();
-
+// Names only — the artist page carries the detail.
 function renderRow(i, row) {
   const a = artists[i];
   row.draggable = !!a;
   const playingArtist = queue.track && (queue.track.albumArtist || queue.track.artist);
-  if (!a) {
-    row.className = `vrow artist-row all${state.view.type === 'all' ? ' active' : ''}`;
-    row.innerHTML = `<span class="ar-avatar all">${icon('library', 18)}</span><span class="ar-text"><span class="ar-name">All artists</span><span class="ar-meta">${plural(state.tracks.size, 'song')}</span></span><button class="ar-play" title="Shuffle library">${icon('shuffle', 14)}</button>`;
-    return;
-  }
-  const active = state.view.type === 'artist' && state.view.id === a.name;
-  row.className = `vrow artist-row${active ? ' active' : ''}${playingArtist === a.name ? ' playing' : ''}`;
-  const hue = [...a.name].reduce((s, c) => s + c.charCodeAt(0), 0) % 6 + 1;
-  const avatar = a.cover
-    ? `<img class="ar-avatar" src="${coverUrl(a.cover, true)}" loading="lazy" draggable="false">`
-    : `<span class="ar-avatar ph" style="--c: var(--viz${hue})">${esc(initials(a.name))}</span>`;
-  row.innerHTML = `${avatar}<span class="ar-text"><span class="ar-name">${esc(a.name)}</span><span class="ar-meta">${plural(a.albums.size, 'album')} · ${plural(a.ids.length, 'song')}</span></span><button class="ar-play" title="Shuffle ${esc(a.name)}">${icon('shuffle', 14)}</button>`;
+  const active = a ? state.view.type === 'artist' && state.view.id === a.name : state.view.type === 'all';
+  row.className = `vrow artist-row${a ? '' : ' all'}${active ? ' active' : ''}${a && playingArtist === a.name ? ' playing' : ''}`;
+  row.title = a ? `${a.name} — ${plural(a.albums.size, 'album')}, ${plural(a.ids.length, 'song')}` : '';
+  row.innerHTML = `<span class="ar-name">${esc(a ? a.name : 'All artists')}</span>`;
 }

@@ -96,8 +96,10 @@ export function applyLook() {
   document.body.dataset.density = s.density;
   document.body.classList.toggle('no-artists', !s.showArtists);
   document.body.classList.toggle('no-nowplaying', !s.showNowPlaying);
-  document.documentElement.style.setProperty('--sidebar-w', `${s.sidebarWidth}px`);
-  document.documentElement.style.setProperty('--artists-w', `${s.artistsWidth}px`);
-  document.documentElement.style.setProperty('--nowplaying-w', `${s.nowPlayingWidth}px`);
+  const root = document.documentElement.style;
+  for (const [prop, key] of [['--sidebar-w', 'sidebarWidth'], ['--artists-w', 'artistsWidth'], ['--nowplaying-w', 'nowPlayingWidth']]) {
+    if (s[key]) root.setProperty(prop, `${s[key]}px`);
+    else root.removeProperty(prop);
+  }
 }
 

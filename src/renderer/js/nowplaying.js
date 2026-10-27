@@ -21,8 +21,9 @@ export function initNowPlaying() {
     h('span.grow'),
     h('button.icon-btn.sm', { title: 'Random visualizer', html: icon('dice', 15), onClick: () => setMode(VIZ_MODES[Math.floor(Math.random() * VIZ_MODES.length)].id) }),
     h('button.icon-btn.sm', { title: 'Fullscreen visualizer (V)', html: icon('expand', 15), onClick: () => openFullViz() }));
-  const vizWrap = h('div.np-viz-wrap', { style: { height: `${state.settings.vizHeight}px` } }, vizCanvas, vizBar);
-  const vizResize = h('div.np-viz-resize', { title: 'Drag to resize' });
+  const vizWrap = h('div.np-viz-wrap', { style: state.settings.vizHeight ? { height: `${state.settings.vizHeight}px` } : {} }, vizCanvas, vizBar);
+  const vizResize = h('div.np-viz-resize', { title: 'Drag to resize · double-click to reset' });
+  vizResize.addEventListener('dblclick', () => { vizWrap.style.height = ''; setSetting('vizHeight', null); });
   vizResize.addEventListener('mousedown', (e) => {
     const startY = e.clientY, startH = vizWrap.offsetHeight;
     const move = (ev) => { vizWrap.style.height = `${Math.max(90, Math.min(520, startH + ev.clientY - startY))}px`; };
