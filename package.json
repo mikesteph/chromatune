@@ -1,0 +1,86 @@
+{
+  "name": "chromatune",
+  "productName": "Chromatune",
+  "version": "1.0.0",
+  "description": "A themeable, offline music player and library manager for Windows and Linux.",
+  "main": "src/main/main.js",
+  "type": "module",
+  "author": "Chromatune",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "start:root": "electron . --no-sandbox",
+    "demo-library": "bash scripts/make-test-library.sh testmusic",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist": "electron-builder --linux --win --publish never"
+  },
+  "dependencies": {
+    "music-metadata": "^11.16.1"
+  },
+  "devDependencies": {
+    "electron": "^38.8.6",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "app.chromatune.player",
+    "productName": "Chromatune",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp3",
+          "flac",
+          "ogg",
+          "oga",
+          "opus",
+          "wav",
+          "m4a",
+          "aac",
+          "webm",
+          "m3u",
+          "m3u8"
+        ],
+        "name": "Audio",
+        "role": "Viewer"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "AudioVideo",
+      "icon": "assets/icon.png",
+      "executableName": "chromatune",
+      "desktop": {
+        "entry": {
+          "Name": "Chromatune",
+          "Comment": "Themeable music player",
+          "Categories": "AudioVideo;Audio;Player;"
+        }
+      }
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": null
+  },
+  "desktopName": "chromatune.desktop"
+}
